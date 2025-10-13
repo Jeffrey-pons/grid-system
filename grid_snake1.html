@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Grid System form snake test 1 </title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           background-color: #d4d4d4;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           min-height: 100vh;
+           overflow: hidden;
+       }
+
+       .container_grid {
+           display: grid;
+           grid-template-columns: repeat(4, 250px);
+           grid-template-rows: repeat(4, 250px);
+           gap: 0;
+       }
+
+       .item {
+           background-color: transparent;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           position: relative;
+       }
+
+       .circle {
+           width: 90%;
+           height: 90%;
+           border-radius: 50%;
+           background-color: transparent;
+           position: relative;
+           z-index: 2;
+           transition: background-color 0.1s ease, border-radius 0.2s ease, width 0.2s ease, height 0.2s ease;
+       }
+
+       .item.active .circle {
+           background-color: #00ff3c;
+       }
+
+       .circle.square {
+           border-radius: 0%;
+           width: 100%;
+           height: 100%;
+       }
+
+       /* Masque noir qui apparaît après le passage */
+       .black-mask {
+           position: absolute;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background-color: #000;
+           opacity: 0;
+           z-index: 1;
+           transition: opacity 0.3s ease;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+       }
+
+       .black-mask::before {
+           content: '';
+           width: 90%;
+           height: 90%;
+           border-radius: 50%;
+           background-color: #d4d4d4;
+           position: absolute;
+       }
+
+       .item.visited .black-mask {
+           opacity: 1;
+       }
+
+       .item.active.visited .black-mask {
+           opacity: 0;
+       }
+   </style>
+</head>
+<body>
+   <div class="container_grid">
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+       <div class="item">
+           <div class="black-mask"></div>
+           <div class="circle"></div>
+       </div>
+   </div>
+
+   <script>
+       const items = document.querySelectorAll('.item');
+       const circles = document.querySelectorAll('.circle');
+       let currentIndex = 0;
+       const totalItems = items.length;
+
+       // Fonction pour rendre aléatoirement les formes carrées
+       function randomizeShapes() {
+           circles.forEach(circle => {
+               // 40% de chance d'être un carré (augmenté pour plus de variété)
+               if (Math.random() < 0.4) {
+                   circle.classList.add('square');
+               } else {
+                   circle.classList.remove('square');
+               }
+           });
+       }
+
+       // Fonction pour basculer l'état d'une cellule
+       function toggleCell(item) {
+           item.classList.add('active');
+           if (item.classList.contains('visited')) {
+               item.classList.remove('visited');
+           } else {
+               item.classList.add('visited');
+           }
+       }
+
+       const patterns = {
+           snake_horizontal: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Serpent horizontal zigzag
+               const path = [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           snake_vertical: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Serpent vertical
+               const path = [0, 4, 8, 12, 13, 9, 5, 1, 2, 6, 10, 14, 15, 11, 7, 3];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           spiral_in: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Spirale de l'extérieur vers l'intérieur
+               const path = [0, 1, 2, 3, 7, 11, 15, 14, 13, 12, 8, 4, 5, 6, 10, 9];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           spiral_out: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Spirale de l'intérieur vers l'extérieur
+               const path = [5, 6, 10, 9, 8, 4, 0, 1, 2, 3, 7, 11, 15, 14, 13, 12];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           diagonal_sweep: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Balayage diagonal complet
+               const path = [0, 4, 1, 8, 5, 2, 12, 9, 6, 3, 13, 10, 7, 14, 11, 15];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           u_shape: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Forme en U
+               const path = [0, 4, 8, 12, 13, 14, 15, 11, 7, 3, 2, 1, 5, 9, 6, 10];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           zigzag_diagonal: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Zigzag diagonal
+               const path = [0, 5, 10, 15, 14, 9, 4, 1, 2, 7, 12, 13, 8, 3, 6, 11];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           wave_pattern: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Vague sinusoïdale
+               const path = [0, 1, 5, 4, 8, 9, 13, 12, 13, 14, 10, 11, 7, 6, 2, 3];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           cross_pattern: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Croix complète
+               const path = [0, 1, 2, 3, 2, 6, 10, 14, 10, 9, 5, 1, 5, 6, 9, 10, 6, 2, 1, 5, 9, 13, 14, 15];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           },
+
+           box_pattern: () => {
+               items.forEach(item => item.classList.remove('active'));
+               randomizeShapes();
+               // Boîtes concentriques
+               const path = [0, 1, 2, 3, 7, 11, 15, 14, 13, 12, 8, 4, 5, 6, 10, 9];
+               const targetIndex = path[currentIndex % path.length];
+
+               items[targetIndex].classList.add('active');
+               setTimeout(() => {
+                   items[targetIndex].classList.remove('active');
+                   toggleCell(items[targetIndex]);
+               }, 50);
+
+               currentIndex = (currentIndex + 1) % path.length;
+           }
+       };
+
+       let currentPattern = 'snake_horizontal';
+       let patternIndex = 0;
+       const patternOrder = [
+           'snake_horizontal',
+           'snake_vertical',
+           'spiral_in',
+           'spiral_out',
+           'u_shape',
+           'wave_pattern',
+           'diagonal_sweep',
+           'zigzag_diagonal',
+           'cross_pattern',
+           'box_pattern'
+       ];
+
+       function animate() {
+           patterns[currentPattern]();
+
+           // Changer de pattern seulement quand on a terminé le parcours complet
+           if (currentIndex === 0) {
+               patternIndex = (patternIndex + 1) % patternOrder.length;
+               currentPattern = patternOrder[patternIndex];
+           }
+       }
+
+       // Animation
+       setInterval(animate, 120);
+
+       items.forEach((item) => {
+           item.addEventListener('mouseenter', () => {
+               items.forEach(i => i.classList.remove('active'));
+               toggleCell(item);
+           });
+       });
+   </script>
+</body>
+</html>

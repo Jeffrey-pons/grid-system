@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Grid Image Toggle Multiple Animations</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background: #15ff00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 200px);
+  grid-template-rows: repeat(4, 200px);
+  gap: 1px;
+}
+
+.cell {
+  width: 200px;
+  height: 200px;
+  background-size: 800px 800px;
+  transition: transform 0.5s, background-image 0.5s;
+}
+
+.cursor {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-color: #ff0000;
+  pointer-events: none;
+  /* transition: top 0.25s ease, left 0.25s ease; */
+  z-index: 10;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="grid"></div>
+
+<script>
+const IMAGES = [
+  "img/IMG_3192.jpg",
+  "img/IMG_3193.jpg",
+  "img/IMG_3194.jpg",
+  "img/IMG_GREEN.jpg",
+  "img/IMG_3203.jpg",
+  "img/IMG_3195.jpg",
+  "img/IMG_3202.jpg",
+  "img/IMG_3201.jpg",
+  "img/IMG_RED.jpg",
+];
+
+const size = 4;
+const cellSize = 200;
+const grid = document.getElementById("grid");
+const cursor = document.createElement("div");
+cursor.className = "cursor";
+grid.appendChild(cursor);
+
+const cells = [];
+
+// Création de la grille (4x4)
+for (let row = 0; row < size; row++) {
+  for (let col = 0; col < size; col++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.dataset.row = row;
+    cell.dataset.col = col;
+    cell.dataset.imageIndex = "0";
+    cell.style.backgroundImage = `url(${IMAGES[0]})`;
+    cell.style.backgroundPosition = `-${col * cellSize}px -${row * cellSize}px`;
+    grid.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+// Retourne la cellule (row, col)
+function getCell(row, col) {
+  return cells[row * size + col];
+}
+
+// Définir les 3 parcours différents
+
+// Parcours 1 : Horizontal (gauche-droite en serpent)
+const pathHorizontal = [];
+for (let row = 0; row < size; row++) {
+  if (row % 2 === 0) {
+    for (let col = 0; col < size; col++) {
+      pathHorizontal.push({row, col});
+    }
+  } else {
+    for (let col = size - 1; col >= 0; col--) {
+      pathHorizontal.push({row, col});
+    }
+  }
+}
+
+// Parcours 2 : Vertical (haut-bas en serpent)
+const pathVertical = [];
+for (let col = 0; col < size; col++) {
+  if (col % 2 === 0) {
+    for (let row = 0; row < size; row++) {
+      pathVertical.push({row, col});
+    }
+  } else {
+    for (let row = size - 1; row >= 0; row--) {
+      pathVertical.push({row, col});
+    }
+  }
+}
+
+// Parcours 3 : Spirale (tour complet)
+const pathSpiral = [];
+// Ligne du haut : gauche → droite
+for (let col = 0; col < size; col++) {
+  pathSpiral.push({row: 0, col: col});
+}
+// Colonne de droite : haut → bas (sans le premier)
+for (let row = 1; row < size; row++) {
+  pathSpiral.push({row: row, col: 3});
+}
+// Ligne du bas : droite → gauche (sans le dernier)
+for (let col = size - 2; col >= 0; col--) {
+  pathSpiral.push({row: 3, col: col});
+}
+// Colonne de gauche : bas → haut (sans le premier et dernier)
+for (let row = size - 2; row > 0; row--) {
+  pathSpiral.push({row: row, col: 0});
+}
+// Intérieur
+pathSpiral.push({row: 1, col: 1});
+pathSpiral.push({row: 1, col: 2});
+pathSpiral.push({row: 2, col: 2});
+pathSpiral.push({row: 2, col: 1});
+
+const paths = [pathHorizontal, pathVertical, pathSpiral];
+let currentPathIndex = 0;
+let pathIndex = 0;
+
+function moveCursor() {
+  const currentPath = paths[currentPathIndex];
+  const pos = currentPath[pathIndex];
+  const cell = getCell(pos.row, pos.col);
+  
+  cursor.style.left = `${cell.offsetLeft}px`;
+  cursor.style.top = `${cell.offsetTop}px`;
+
+  // Changer uniquement cette cellule
+  let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+  cell.dataset.imageIndex = nextImageIndex;
+  cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+  cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
+
+  // Passer à la prochaine position
+  pathIndex++;
+  
+  // Si on a fini le parcours actuel, passer au suivant
+  if (pathIndex >= currentPath.length) {
+    pathIndex = 0;
+    currentPathIndex = (currentPathIndex + 1) % paths.length;
+  }
+}
+
+setInterval(moveCursor, 100);
+</script>
+
+</body>
+</html>

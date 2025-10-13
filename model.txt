@@ -1,0 +1,188 @@
+🎨 Structure HTML/CSS
+cssbody {
+  background: #15ff00;  /* Fond vert fluo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;  /* Plein écran */
+}
+Le body centre tout au milieu de l'écran.
+css.container {
+  display: grid;
+  grid-template-columns: repeat(4, 200px);  /* 4 colonnes de 200px */
+  grid-template-rows: repeat(4, 200px);     /* 4 lignes de 200px */
+  gap: 1px;  /* Espacement entre les cases */
+}
+Crée une grille 4x4 de 200px chacune.
+css.cell {
+  width: 200px;
+  height: 200px;
+  background-size: 800px 800px;  /* L'image complète fait 800x800 */
+  transition: transform 0.5s, background-image 0.5s;  /* Animation douce */
+}
+Chaque cellule affiche un morceau d'une image de 800x800px.
+css.cursor {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-color: #ff0000;  /* Curseur rouge */
+  z-index: 10;  /* Au-dessus des cellules */
+}
+Le carré rouge qui se déplace sur la grille.
+
+📸 Les Images
+javascriptconst IMAGES = [
+  "img/IMG_3192.jpg",
+  "img/IMG_3193.jpg",
+  // ... 9 images au total
+];
+9 images qui vont défiler. Chaque image fait 800x800px et sera découpée en 16 morceaux (4x4).
+
+🏗️ Création de la Grille
+javascriptfor (let row = 0; row < size; row++) {
+  for (let col = 0; col < size; col++) {
+    const cell = document.createElement("div");
+    cell.dataset.row = row;  // Position ligne (0-3)
+    cell.dataset.col = col;  // Position colonne (0-3)
+    cell.dataset.imageIndex = "0";  // Image actuelle (0-8)
+    
+    // Afficher la bonne portion de l'image
+    cell.style.backgroundImage = `url(${IMAGES[0]})`;
+    cell.style.backgroundPosition = `-${col * cellSize}px -${row * cellSize}px`;
+backgroundPosition : C'est la clé !
+
+Case (0,0) : -0px -0px → affiche le coin haut-gauche de l'image
+Case (1,0) : -200px -0px → décale l'image de 200px vers la gauche
+Case (0,1) : -0px -200px → décale l'image de 200px vers le haut
+
+Exemple visuel :
+Image 800x800px découpée en 4x4 :
+┌─────┬─────┬─────┬─────┐
+│ 0,0 │ 1,0 │ 2,0 │ 3,0 │  ← Ligne 0
+├─────┼─────┼─────┼─────┤
+│ 0,1 │ 1,1 │ 2,1 │ 3,1 │  ← Ligne 1
+├─────┼─────┼─────┼─────┤
+│ 0,2 │ 1,2 │ 2,2 │ 3,2 │  ← Ligne 2
+├─────┼─────┼─────┼─────┤
+│ 0,3 │ 1,3 │ 2,3 │ 3,3 │  ← Ligne 3
+└─────┴─────┴─────┴─────┘
+
+🐍 Les 3 Parcours Snake
+1. Snake Horizontal (zigzag horizontal)
+javascriptconst pathHorizontal = [];
+for (let row = 0; row < size; row++) {
+  if (row % 2 === 0) {  // Lignes paires : gauche → droite
+    for (let col = 0; col < size; col++) {
+      pathHorizontal.push({row, col});
+    }
+  } else {  // Lignes impaires : droite → gauche
+    for (let col = size - 1; col >= 0; col--) {
+      pathHorizontal.push({row, col});
+    }
+  }
+}
+Parcours :
+→ → → →
+      ↓
+← ← ← ←
+↓
+→ → → →
+      ↓
+← ← ← ←
+Ordre : [0,0 → 1,0 → 2,0 → 3,0 → 3,1 → 2,1 → 1,1 → 0,1 → ...]
+
+2. Snake Vertical (zigzag vertical)
+javascriptconst pathVertical = [];
+for (let col = 0; col < size; col++) {
+  if (col % 2 === 0) {  // Colonnes paires : haut → bas
+    for (let row = 0; row < size; row++) {
+      pathVertical.push({row, col});
+    }
+  } else {  // Colonnes impaires : bas → haut
+    for (let row = size - 1; row >= 0; row--) {
+      pathVertical.push({row, col});
+    }
+  }
+}
+Parcours :
+↓   ↑   ↓   ↑
+↓   ↑   ↓   ↑
+↓   ↑   ↓   ↑
+↓ → ↑ → ↓ → ↑
+
+3. Spirale (du bord vers le centre)
+javascriptconst pathSpiral = [];
+// Ligne du haut : gauche → droite
+for (let col = 0; col < size; col++) {
+  pathSpiral.push({row: 0, col: col});
+}
+// Colonne de droite : haut → bas
+for (let row = 1; row < size; row++) {
+  pathSpiral.push({row: row, col: 3});
+}
+// Ligne du bas : droite → gauche
+for (let col = size - 2; col >= 0; col--) {
+  pathSpiral.push({row: 3, col: col});
+}
+// Colonne de gauche : bas → haut
+for (let row = size - 2; row > 0; row--) {
+  pathSpiral.push({row: row, col: 0});
+}
+// Intérieur (carré du milieu)
+pathSpiral.push({row: 1, col: 1});
+pathSpiral.push({row: 1, col: 2});
+pathSpiral.push({row: 2, col: 2});
+pathSpiral.push({row: 2, col: 1});
+Parcours :
+→ → → ↓
+      ↓
+← ← ← ↓
+↑     ↓
+↑ ← ← ←
+Puis remplit le centre.
+
+🎬 Fonction d'Animation
+javascriptfunction moveCursor() {
+  const currentPath = paths[currentPathIndex];  // Quel parcours ?
+  const pos = currentPath[pathIndex];  // Quelle position dans ce parcours ?
+  const cell = getCell(pos.row, pos.col);  // Récupérer la cellule
+  
+  // Déplacer le curseur rouge
+  cursor.style.left = `${cell.offsetLeft}px`;
+  cursor.style.top = `${cell.offsetTop}px`;
+
+  // Changer l'image de cette cellule
+  let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+  cell.dataset.imageIndex = nextImageIndex;
+  cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+  cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
+
+  // Avancer dans le parcours
+  pathIndex++;
+  
+  // Fin du parcours ? Passer au suivant
+  if (pathIndex >= currentPath.length) {
+    pathIndex = 0;
+    currentPathIndex = (currentPathIndex + 1) % paths.length;
+  }
+}
+
+setInterval(moveCursor, 100);  // Appeler toutes les 100ms
+
+🔄 Le Cycle Complet
+
+Snake Horizontal : Fait 16 mouvements (toutes les cases)
+Passe à Snake Vertical : 16 mouvements
+Passe à Spirale : 16 mouvements
+Recommence au Snake Horizontal
+
+À chaque passage, l'image change : IMG_3192 → IMG_3193 → IMG_3194 → ... → IMG_RED → IMG_3192 (recommence)
+
+🎯 En Résumé
+
+16 cellules affichent chacune 1/16ème d'une image 800x800px
+Le curseur rouge se déplace selon 3 parcours différents
+À chaque passage, la cellule passe à l'image suivante (9 images au total)
+Les parcours alternent : Horizontal → Vertical → Spirale → Recommence
+
+C'est comme un puzzle animé qui change constamment ! 🧩✨
