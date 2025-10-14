@@ -10,13 +10,12 @@
   box-sizing: border-box;
 }
 body {
-  background: #15ff00;
+  background: black;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
-
 .container {
   position: relative;
   display: grid;
@@ -24,35 +23,31 @@ body {
   grid-template-rows: repeat(4, 200px);
   gap: 1px;
 }
-
 .cell {
   width: 200px;
   height: 200px;
   background-size: 800px 800px;
   transition: transform 0.5s, background-image 0.5s;
 }
-
 .cursor {
   position: absolute;
   width: 80px;
   height: 80px;
   background-color: #ff0000;
   pointer-events: none;
-  border-radius:50%;
-  /* transition: top 0.25s ease, left 0.25s ease; */
+  border-radius: 50%;
+  transition: top 0.25s ease, left 0.25s ease;
   z-index: 10;
   opacity: 1;
+  transform: translate(60px, 60px); /* Centrer le rond dans la case */
 }
-
 .cursor.hidden {
   opacity: 0;
 }
 </style>
 </head>
 <body>
-
 <div class="container" id="grid"></div>
-
 <script>
 const IMAGES = [
   "img/IMG_3192.jpg",
@@ -61,16 +56,13 @@ const IMAGES = [
   "img/IMG_3204.jpg",
   "img/IMG_GREEN.jpg",
 ];
-
 const size = 4;
 const cellSize = 200;
 const grid = document.getElementById("grid");
 const cursor = document.createElement("div");
 cursor.className = "cursor";
 grid.appendChild(cursor);
-
 const cells = [];
-
 // Création de la grille (4x4)
 for (let row = 0; row < size; row++) {
   for (let col = 0; col < size; col++) {
@@ -85,41 +77,49 @@ for (let row = 0; row < size; row++) {
     cells.push(cell);
   }
 }
-
 // Retourne la cellule (row, col)
 function getCell(row, col) {
   return cells[row * size + col];
 }
-
+// Parcours du bord (tour extérieur)
+const borderPath = [
+  {row: 0, col: 0}, {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3},
+  {row: 1, col: 3}, {row: 2, col: 3}, {row: 3, col: 3},
+  {row: 3, col: 2}, {row: 3, col: 1}, {row: 3, col: 0},
+  {row: 2, col: 0}, {row: 1, col: 0}
+];
+// Parcours du centre (4 cases au milieu)
+const centerPath = [
+  {row: 1, col: 1}, {row: 1, col: 2},
+  {row: 2, col: 2}, {row: 2, col: 1}
+];
 let row = 0;
 let col = 0;
 let dirDown = true;
 let dirRight = true;
-let mode = 'snake'; // Modes: 'snake', 'checkerboard', 'glitch'
+let mode = 'snake'; // Modes: 'snake', 'checkerboard', 'corner', 'border', 'center', 'glitch'
 let glitchCount = 0;
-let glitchInterval = null;
-let checkerboardCycles = 0;
-
-// Fonction pour effet glitch : changer aléatoirement quelques cellules
+let cornerCount = 0;
+let borderLoops = 0;
+let centerLoops = 0;
+let checkerboardLoops = 0;
+let pathIndex = 0;
+// Fonction pour effet glitch
 function glitchEffect() {
-  // Changer 4 à 8 cellules aléatoires à chaque fois
   const numCellsToChange = Math.floor(Math.random() * 5) + 4;
-  
+
   for (let i = 0; i < numCellsToChange; i++) {
     const randomCell = cells[Math.floor(Math.random() * cells.length)];
     const randomImageIndex = Math.floor(Math.random() * IMAGES.length);
-    
+
     randomCell.dataset.imageIndex = randomImageIndex;
     randomCell.style.backgroundImage = `url(${IMAGES[randomImageIndex]})`;
     randomCell.style.backgroundPosition = `-${randomCell.dataset.col * cellSize}px -${randomCell.dataset.row * cellSize}px`;
   }
-  
+
   glitchCount++;
-  
-  // Après environ 30 glitches (3 secondes à 100ms), revenir au mode snake
+
   if (glitchCount >= 30) {
-    clearInterval(glitchInterval);
-    glitchInterval = null;
     mode = 'snake';
     glitchCount = 0;
     row = 0;
@@ -129,32 +129,116 @@ function glitchEffect() {
     cursor.classList.remove('hidden');
   }
 }
-
 function moveCursor() {
   if (mode === 'glitch') {
-    return; // Le glitch est géré par son propre interval
+    glitchEffect();
+    return;
   }
+  // Mode damier (une case sur deux, plusieurs fois)
+  if (mode === 'checkerboard') {
+      for (let i = 0; i < cells.length; i++) {
+          const cell = cells[i];
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          if ((row + col) % 2 === 0) {
+              let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+              cell.dataset.imageIndex = nextImageIndex;
+              cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+              cell.style.backgroundPosition = `-${col * cellSize}px -${row * cellSize}px`;
+          }
+      }
+      checkerboardLoops++;
+      if (checkerboardLoops >= 3) { // 3 itérations en mode damier
+          mode = 'glitch';
+          cursor.classList.add('hidden');
+          checkerboardLoops = 0;
+      }
+      return;
+  }
+  let cell;
+  // Mode coin haut-droite (plusieurs fois)
+  if (mode === 'corner') {
+    cell = getCell(0, 3);
+    cursor.style.left = `${cell.offsetLeft}px`;
+    cursor.style.top = `${cell.offsetTop}px`;
 
-  const cell = getCell(row, col);
+    let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+    cell.dataset.imageIndex = nextImageIndex;
+    cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+    cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
+
+    cornerCount++;
+    if (cornerCount >= 10) { // 10 passages sur le coin
+      mode = 'border';
+      cornerCount = 0;
+      pathIndex = 0;
+      borderLoops = 0;
+    }
+    return;
+  }
+  // Mode bord (tour extérieur plusieurs fois)
+  if (mode === 'border') {
+    const pos = borderPath[pathIndex];
+    cell = getCell(pos.row, pos.col);
+    cursor.style.left = `${cell.offsetLeft}px`;
+    cursor.style.top = `${cell.offsetTop}px`;
+
+    let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+    cell.dataset.imageIndex = nextImageIndex;
+    cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+    cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
+
+    pathIndex++;
+    if (pathIndex >= borderPath.length) {
+      pathIndex = 0;
+      borderLoops++;
+      if (borderLoops >= 3) { // 3 tours du bord
+        mode = 'center';
+        pathIndex = 0;
+        centerLoops = 0;
+      }
+    }
+    return;
+  }
+  // Mode centre (4 cases centrales plusieurs fois)
+  if (mode === 'center') {
+    const pos = centerPath[pathIndex];
+    cell = getCell(pos.row, pos.col);
+    cursor.style.left = `${cell.offsetLeft}px`;
+    cursor.style.top = `${cell.offsetTop}px`;
+
+    let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+    cell.dataset.imageIndex = nextImageIndex;
+    cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+    cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
+
+    pathIndex++;
+    if (pathIndex >= centerPath.length) {
+      pathIndex = 0;
+      centerLoops++;
+      if (centerLoops >= 5) { // 5 tours du centre
+        mode = 'checkerboard';
+        pathIndex = 0;
+        checkerboardLoops = 0;
+      }
+    }
+    return;
+  }
+  // Mode snake normal
+  cell = getCell(row, col);
   cursor.style.left = `${cell.offsetLeft}px`;
   cursor.style.top = `${cell.offsetTop}px`;
-
-  // Déterminer si on doit changer l'image de cette cellule
   let shouldUpdate = true;
-  
+
   if (mode === 'checkerboard') {
-    // En mode damier : seulement une case sur deux
     shouldUpdate = (row + col) % 2 === 0;
   }
-
-  // Changer l'image seulement si nécessaire
   if (shouldUpdate) {
     let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
     cell.dataset.imageIndex = nextImageIndex;
     cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
     cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
   }
-
   // Mouvement snake vertical
   if (dirDown) {
     if (row < size - 1) {
@@ -171,8 +255,6 @@ function moveCursor() {
       col += dirRight ? 1 : -1;
     }
   }
-
-  // Si on atteint la fin d'une ligne, on inverse la direction horizontale
   if (col >= size) {
     col = size - 1;
     dirRight = false;
@@ -180,24 +262,13 @@ function moveCursor() {
   if (col < 0) {
     col = 0;
     dirRight = true;
-    
-    // Un cycle complet est terminé
+
     if (mode === 'snake') {
-      // Snake terminé, passer en mode damier
-      mode = 'checkerboard';
-      checkerboardCycles = 0;
-    } else if (mode === 'checkerboard') {
-      // Damier terminé après 1 cycle, passer en mode glitch
-      mode = 'glitch';
-      cursor.classList.add('hidden'); // Cacher le curseur
-      // Démarrer l'effet glitch rapide
-      glitchInterval = setInterval(glitchEffect, 100);
+      mode = 'corner';
     }
   }
 }
-
 setInterval(moveCursor, 100);
 </script>
-
 </body>
 </html>
