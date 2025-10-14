@@ -2,7 +2,7 @@
 
 **Une animation interactive de grille d'images avec plusieurs effets visuels (snake, damier, bordure, centre, glitch).**
 
-![Grid System - Image Toggle Demo](grid-system-example.gif)
+![Grid System - Image Toggle Demo](/img/grid-system-example.gif)
 
 ---
 
@@ -25,16 +25,18 @@ L'animation boucle automatiquement entre ces modes.
 ### 1. **Cloner le dépôt** (ou télécharger les fichiers) :
    ```bash
    git clone https://github.com/Jeffrey-pons/grid-system
+   cd grid-system
+   code .
    ```
 ### 2. **Placer tes images** :
 
-- Crée un dossier img/ à la racine du projet.
-- Ajoute tes images
-- Modifie le tableau IMAGES dans le fichier index.html.
+- Ajoute tes images dans le dossier /img
+- Modifie et intègre tes images dans le tableau IMAGES dans le fichier source.
 
 ### 3. **Ouvrir le projet** :
 
-- Ouvre le fichier index.html dans ton navigateur (Chrome, Firefox, etc.) ou utiliser l'extension Go live depuis VS Code.
+- Ouvre le fichier index.html dans ton navigateur (Chrome, Firefox, etc.) 
+- Utiliser l'extension Go live disponible sur VS Code.
 
 ## Personnalisation
 ### 1. Changer les images
@@ -65,5 +67,4 @@ const cellSize = 200; // Taille d'une case en pixels
 
 # Crédits
 
-- Développé par Jeffrey Pons.
-- Inspiré par le module grid system par Tim Rodenbroeker.
+- Développé par Jeffrey Pons. Inspiré par le module grid system par Tim Rodenbroeker.
