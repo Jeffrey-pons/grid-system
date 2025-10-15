@@ -31,15 +31,15 @@ body {
 }
 .cursor {
   position: absolute;
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   background-color: #ff0000;
   pointer-events: none;
   border-radius: 50%;
   transition: top 0.25s ease, left 0.25s ease;
   z-index: 10;
   opacity: 1;
-  transform: translate(60px, 60px); /* Centrer le rond dans la case */
+  transform: translate(80px, 80px); 
 }
 .cursor.hidden {
   opacity: 0;
@@ -50,11 +50,13 @@ body {
 <div class="container" id="grid"></div>
 <script>
 const IMAGES = [
-  "img/IMG_3192.jpg",
-  "img/IMG_3193.jpg",
-  "img/IMG_3194.jpg",
-  "img/IMG_3204.jpg",
-  "img/IMG_GREEN.jpg",
+  "img/round-img2/32.jpg",
+  "img/round-img2/33.jpg",
+  "img/round-img2/34.jpg",
+  "img/round-img2/triangle_purple.jpg",
+  "img/round-img2/IMG_4755.jpeg",
+  "img/round-img2/IMG_8892.jpeg",
+  "img/round-img2/triangle_blue.jpg",
 ];
 const size = 4;
 const cellSize = 200;
@@ -268,7 +270,7 @@ function moveCursor() {
     }
   }
 }
-setInterval(moveCursor, 100);
+setInterval(moveCursor, 50);
 </script>
 </body>
 </html>
