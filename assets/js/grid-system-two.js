@@ -1,65 +1,16 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Grid Image Toggle Multiple Animations</title>
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-body {
-  background: #15ff00;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, 200px);
-  grid-template-rows: repeat(4, 200px);
-  gap: 1px;
-}
-
-.cell {
-  width: 200px;
-  height: 200px;
-  background-size: 800px 800px;
-  transition: transform 0.5s, background-image 0.5s;
-}
-
-.cursor {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background-color: #ff0000;
-  pointer-events: none;
-  /* transition: top 0.25s ease, left 0.25s ease; */
-  z-index: 10;
-}
-</style>
-</head>
-<body>
-
-<div class="container" id="grid"></div>
-
-<script>
 const IMAGES = [
-  "img/IMG_3192.jpg",
-  "img/IMG_3193.jpg",
-  "img/IMG_3194.jpg",
-  "img/IMG_GREEN.jpg",
-  "img/IMG_3203.jpg",
-  "img/IMG_3195.jpg",
-  "img/IMG_3202.jpg",
-  "img/IMG_3201.jpg",
-  "img/IMG_RED.jpg",
+  "assets/img/grid-system-two/IMG_3192.jpg",
+  "assets/img/grid-system-two/IMG_3193.jpg",
+  "assets/img/grid-system-two/IMG_3194.jpg",
+  "assets/img/grid-system-two/IMG_GREEN.jpg",
+  "assets/img/grid-system-two/IMG_3203.jpg",
+  "assets/img/grid-system-two/IMG_3195.jpg",
+  "assets/img/grid-system-two/IMG_3202.jpg",
+  "assets/img/grid-system-two/IMG_3201.jpg",
+  "assets/img/grid-system-two/IMG_RED.jpg",
 ];
 
+// DEf de la grille
 const size = 4;
 const cellSize = 200;
 const grid = document.getElementById("grid");
@@ -69,7 +20,7 @@ grid.appendChild(cursor);
 
 const cells = [];
 
-// Création de la grille (4x4)
+// grille (4x4)
 for (let row = 0; row < size; row++) {
   for (let col = 0; col < size; col++) {
     const cell = document.createElement("div");
@@ -84,14 +35,14 @@ for (let row = 0; row < size; row++) {
   }
 }
 
-// Retourne la cellule (row, col)
+// retourne la cellule > changement d'état 
 function getCell(row, col) {
   return cells[row * size + col];
 }
 
-// Définir les 3 parcours différents
+//3 parcours différents
 
-// Parcours 1 : Horizontal (gauche-droite en serpent)
+// 1 : Horizontal (gauche-droite /snake)
 const pathHorizontal = [];
 for (let row = 0; row < size; row++) {
   if (row % 2 === 0) {
@@ -105,7 +56,7 @@ for (let row = 0; row < size; row++) {
   }
 }
 
-// Parcours 2 : Vertical (haut-bas en serpent)
+//2 : Vertical (haut bas en serpent)
 const pathVertical = [];
 for (let col = 0; col < size; col++) {
   if (col % 2 === 0) {
@@ -119,7 +70,7 @@ for (let col = 0; col < size; col++) {
   }
 }
 
-// Parcours 3 : Spirale (tour complet)
+// 3 : Spirale tour complet
 const pathSpiral = [];
 // Ligne du haut : gauche → droite
 for (let col = 0; col < size; col++) {
@@ -171,8 +122,4 @@ function moveCursor() {
   }
 }
 
-setInterval(moveCursor, 100);
-</script>
-
-</body>
-</html>
+setInterval(moveCursor, 50);

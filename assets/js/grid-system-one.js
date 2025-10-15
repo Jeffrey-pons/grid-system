@@ -1,63 +1,18 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Grid Image Toggle test 1</title>
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-body {
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-.container {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, 200px);
-  grid-template-rows: repeat(4, 200px);
-  gap: 1px;
-}
-.cell {
-  width: 200px;
-  height: 200px;
-  background-size: 800px 800px;
-  transition: transform 0.5s, background-image 0.5s;
-}
-.cursor {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background-color: #ff0000;
-  pointer-events: none;
-  border-radius: 50%;
-  transition: top 0.25s ease, left 0.25s ease;
-  z-index: 10;
-  opacity: 1;
-  transform: translate(80px, 80px); 
-}
-.cursor.hidden {
-  opacity: 0;
-}
-</style>
-</head>
-<body>
-<div class="container" id="grid"></div>
-<script>
+ //traitement img
 const IMAGES = [
-  "img/round-img2/32.jpg",
-  "img/round-img2/33.jpg",
-  "img/round-img2/34.jpg",
-  "img/round-img2/triangle_purple.jpg",
-  "img/round-img2/IMG_4755.jpeg",
-  "img/round-img2/IMG_8892.jpeg",
-  "img/round-img2/triangle_blue.jpg",
+  "assets/img/grid-system-one/32.jpg",
+  "assets/img/grid-system-one/33.jpg",
+  "assets/img/grid-system-one/34.jpg",
+  "assets/img/grid-system-one/IMG_4755.jpeg",
+  "assets/img/grid-system-one/IMG_8892.jpeg",
 ];
+
+const SHAPES = [
+  "assets/img/grid-system-one/triangle_blue.png",
+  "assets/img/grid-system-one/circle_purple.png"
+];
+
+// définition de la grille 4x4
 const size = 4;
 const cellSize = 200;
 const grid = document.getElementById("grid");
@@ -65,7 +20,8 @@ const cursor = document.createElement("div");
 cursor.className = "cursor";
 grid.appendChild(cursor);
 const cells = [];
-// Création de la grille (4x4)
+
+// définition de la grille 4x4
 for (let row = 0; row < size; row++) {
   for (let col = 0; col < size; col++) {
     const cell = document.createElement("div");
@@ -79,18 +35,23 @@ for (let row = 0; row < size; row++) {
     cells.push(cell);
   }
 }
-// Retourne la cellule (row, col)
+
+// ordre de direction de l'animation de la grille
+// snake > corner haut & droite > border > center > checkboard > corner-bottom-left > glitch > snake (et ca repart)
+
+// retourne la cellule > changement d'état l'mg sur la grille
 function getCell(row, col) {
   return cells[row * size + col];
 }
-// Parcours du bord (tour extérieur)
+
+// Parcour du bord (tour exterieur)
 const borderPath = [
   {row: 0, col: 0}, {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3},
   {row: 1, col: 3}, {row: 2, col: 3}, {row: 3, col: 3},
   {row: 3, col: 2}, {row: 3, col: 1}, {row: 3, col: 0},
   {row: 2, col: 0}, {row: 1, col: 0}
 ];
-// Parcours du centre (4 cases au milieu)
+// parcour du centre (carré 2x2)
 const centerPath = [
   {row: 1, col: 1}, {row: 1, col: 2},
   {row: 2, col: 2}, {row: 2, col: 1}
@@ -106,58 +67,57 @@ let borderLoops = 0;
 let centerLoops = 0;
 let checkerboardLoops = 0;
 let pathIndex = 0;
+
 // Fonction pour effet glitch
 function glitchEffect() {
   const numCellsToChange = Math.floor(Math.random() * 5) + 4;
-
   for (let i = 0; i < numCellsToChange; i++) {
     const randomCell = cells[Math.floor(Math.random() * cells.length)];
     const randomImageIndex = Math.floor(Math.random() * IMAGES.length);
-
     randomCell.dataset.imageIndex = randomImageIndex;
     randomCell.style.backgroundImage = `url(${IMAGES[randomImageIndex]})`;
     randomCell.style.backgroundPosition = `-${randomCell.dataset.col * cellSize}px -${randomCell.dataset.row * cellSize}px`;
   }
-
   glitchCount++;
-
   if (glitchCount >= 30) {
     mode = 'snake';
     glitchCount = 0;
-    row = 0;
-    col = 0;
-    dirDown = true;
-    dirRight = true;
+    row = 0; col = 0;
+    dirDown = true; dirRight = true;
     cursor.classList.remove('hidden');
   }
 }
+
 function moveCursor() {
   if (mode === 'glitch') {
     glitchEffect();
     return;
   }
+
   // Mode damier (une case sur deux, plusieurs fois)
   if (mode === 'checkerboard') {
-      for (let i = 0; i < cells.length; i++) {
-          const cell = cells[i];
-          const row = parseInt(cell.dataset.row);
-          const col = parseInt(cell.dataset.col);
-          if ((row + col) % 2 === 0) {
-              let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
-              cell.dataset.imageIndex = nextImageIndex;
-              cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
-              cell.style.backgroundPosition = `-${col * cellSize}px -${row * cellSize}px`;
-          }
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      const row = parseInt(cell.dataset.row);
+      const col = parseInt(cell.dataset.col);
+      if ((row + col) % 2 === 0) {
+        let nextImageIndex = (parseInt(cell.dataset.imageIndex) + 1) % IMAGES.length;
+        cell.dataset.imageIndex = nextImageIndex;
+        cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
+        cell.style.backgroundPosition = `-${col * cellSize}px -${row * cellSize}px`;
       }
-      checkerboardLoops++;
+    }
+    checkerboardLoops++;
       if (checkerboardLoops >= 3) { // 3 itérations en mode damier
           mode = 'glitch';
           cursor.classList.add('hidden');
-          checkerboardLoops = 0;
-      }
-      return;
+      checkerboardLoops = 0;
+    }
+    return;
   }
+
   let cell;
+
   // Mode coin haut-droite (plusieurs fois)
   if (mode === 'corner') {
     cell = getCell(0, 3);
@@ -178,7 +138,8 @@ function moveCursor() {
     }
     return;
   }
-  // Mode bord (tour extérieur plusieurs fois)
+
+  // Bord
   if (mode === 'border') {
     const pos = borderPath[pathIndex];
     cell = getCell(pos.row, pos.col);
@@ -202,6 +163,7 @@ function moveCursor() {
     }
     return;
   }
+
   // Mode centre (4 cases centrales plusieurs fois)
   if (mode === 'center') {
     const pos = centerPath[pathIndex];
@@ -226,7 +188,7 @@ function moveCursor() {
     }
     return;
   }
-  // Mode snake normal
+  //mode snake normal
   cell = getCell(row, col);
   cursor.style.left = `${cell.offsetLeft}px`;
   cursor.style.top = `${cell.offsetTop}px`;
@@ -241,6 +203,7 @@ function moveCursor() {
     cell.style.backgroundImage = `url(${IMAGES[nextImageIndex]})`;
     cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
   }
+
   // Mouvement snake vertical
   if (dirDown) {
     if (row < size - 1) {
@@ -270,7 +233,5 @@ function moveCursor() {
     }
   }
 }
+
 setInterval(moveCursor, 50);
-</script>
-</body>
-</html>
