@@ -1,10 +1,12 @@
  //traitement img
 const IMAGES = [
-  "assets/img/grid-system-one/32.jpg",
-  "assets/img/grid-system-one/33.jpg",
-  "assets/img/grid-system-one/34.jpg",
-  "assets/img/grid-system-one/IMG_4755.jpeg",
-  "assets/img/grid-system-one/IMG_8892.jpeg",
+  "assets/img/grid-system-one/IMG_3204.jpg",
+  "assets/img/grid-system-one/IMG_3239.JPG",
+  "assets/img/grid-system-one/IMG_3242.JPG",
+  "assets/img/grid-system-one/IMG_3243.JPG",
+  "assets/img/grid-system-one/IMG_3246.JPG",
+  "assets/img/grid-system-one/IMG_3252.JPG",
+  "assets/img/grid-system-one/IMG_3245.JPG",
 ];
 
 const SHAPES = [
@@ -130,7 +132,7 @@ function moveCursor() {
     cell.style.backgroundPosition = `-${cell.dataset.col * cellSize}px -${cell.dataset.row * cellSize}px`;
 
     cornerCount++;
-    if (cornerCount >= 10) { // 10 passages sur le coin
+    if (cornerCount >= 14) { // 10 passages sur le coin
       mode = 'border';
       cornerCount = 0;
       pathIndex = 0;
@@ -234,4 +236,4 @@ function moveCursor() {
   }
 }
 
-setInterval(moveCursor, 50);
+setInterval(moveCursor, 40);

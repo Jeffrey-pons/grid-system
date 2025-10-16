@@ -122,4 +122,4 @@ function moveCursor() {
   }
 }
 
-setInterval(moveCursor, 50);
+setInterval(moveCursor, 60);
